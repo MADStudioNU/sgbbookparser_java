@@ -19,9 +19,7 @@ public class SGBBookExtractor {
 	private Hashtable<String, Chapter> chapterTable;
 	private Hashtable<String, Character> characterTable;
 	private Vector<Meetup> masterListOfMeetups;
-	private Hashtable<String, Vector<Meetup>> characterPairMeetups;
-	private Hashtable<String, Vector<Meetup>> chapterMeetups;
-	private Hashtable<String, Vector<Meetup>> characterMeetups;
+
 	
 	public static void main(String[] args) {
 		SGBBookExtractor bookProcessor = null;
@@ -56,9 +54,7 @@ public class SGBBookExtractor {
 		chapterTable = new Hashtable<String, Chapter>();
 		characterTable = new Hashtable<String, Character>();
 		masterListOfMeetups = new Vector<Meetup>();
-		characterPairMeetups = new Hashtable<String, Vector<Meetup>>();
-		chapterMeetups = new Hashtable<String, Vector<Meetup>>();
-		characterMeetups = new Hashtable<String, Vector<Meetup>>();
+
 		
 		parseSourceFile(sourceFileData);
 		
@@ -189,12 +185,6 @@ public class SGBBookExtractor {
 										Meetup newMeetup = new Meetup(chapter, char1, char2);
 										addToMeetupMasterList(newMeetup);
 
-										
-										// I don't know why I am doing these three, since we don't really use them
-										addToCharacterPairMeetups(char1, char2, newMeetup);
-										addToChapterMeetups(chapter, newMeetup);
-										addToCharacterMeetups(char1, newMeetup);
-										addToCharacterMeetups(char2, newMeetup);
 									}
 								}							
 							}							
@@ -396,41 +386,6 @@ public class SGBBookExtractor {
 		masterListOfMeetups.add(meetup);
 	}
 	
-	private void addToCharacterPairMeetups(Character char1, Character char2, Meetup meetup) {
-		// get existing meetup list
-		String key = char1.identifier().trim() + "|" + char2.identifier().trim();
-		Vector<Meetup> meetupList = characterPairMeetups.get(key);
-		if (meetupList == null) {
-			meetupList = new Vector<Meetup>();
-			meetupList.add(meetup);
-			characterPairMeetups.put(key, meetupList);
-		} else {
-			meetupList.add(meetup);
-		}
-	}
-	
-	private void addToChapterMeetups(Chapter chapter, Meetup meetup) {
-		String key = chapter.identifier().trim();
-		Vector<Meetup> meetupList = chapterMeetups.get(key);
-		if (meetupList == null) {
-			meetupList = new Vector<Meetup>();
-			meetupList.add(meetup);
-			chapterMeetups.put(key, meetupList);
-		} else {
-			meetupList.add(meetup);
-		}
-	}
-	
-	private void addToCharacterMeetups(Character character, Meetup meetup) {
-		String key = character.identifier().trim();
-		Vector<Meetup> meetupList = characterMeetups.get(key);
-		if(meetupList == null) {
-			meetupList = new Vector<Meetup>();
-			meetupList.add(meetup);
-			characterMeetups.put(key, meetupList);
-		} else {
-			meetupList.add(meetup);
-		}
-	}
+
 
 }
