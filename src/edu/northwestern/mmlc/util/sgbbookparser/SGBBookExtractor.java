@@ -250,6 +250,8 @@ public class SGBBookExtractor {
 	public String generateHTMLTable() {
 		String htmlPreamble = "<html>" + "\n"
 				   + "<head>" + "\n"
+				   + "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />" + "\n"
+				   + "<meta charset=\"utf-8\" />" + "\n"
 				   + "<title>Character Data</title>"+ "\n"
 				   + "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js\"></script>" + "\n"
 				   + "<script type=\"text/javascript\" src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.5/js/jquery.tablesorter.js\"></script>" + "\n"
