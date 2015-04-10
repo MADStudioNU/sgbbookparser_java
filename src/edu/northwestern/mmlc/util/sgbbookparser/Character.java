@@ -12,8 +12,12 @@ public class Character {
 	private String identifier;
 	private String shortName;
 	private String longName;
+	// where the character is the first character of a pair of characters meeting
 	private ArrayList<Meetup> meetupsAsFirstCharacter;
+	// where the character is the second character of a pair of characters meeting
 	private ArrayList<Meetup> meetupsAsSecondCharacter;
+	// a list of single occurrences (solitary mentions) for the character
+	private ArrayList<Chapter> solitaryMentions;
 		
 	public Character(String newIdentifier, String newShortName, String newLongName) {
 		identifier = newIdentifier;
@@ -21,6 +25,7 @@ public class Character {
 		longName = newLongName;
 		meetupsAsFirstCharacter = new ArrayList<Meetup>();
 		meetupsAsSecondCharacter = new ArrayList<Meetup>();
+		solitaryMentions = new ArrayList<Chapter>();
 	}
 	
 	public String identifier() {
@@ -41,6 +46,10 @@ public class Character {
 		meetupsAsSecondCharacter.add(meetup);
 	}
 	
+	public void addToListOfSolitaryMentions(Chapter chapter) {
+		solitaryMentions.add(chapter);
+	}
+	
 	public ArrayList<Meetup> allMeetups() {
 		ArrayList<Meetup> combinedVector = new ArrayList<Meetup>();
 		combinedVector.addAll(meetupsAsFirstCharacter);
@@ -48,35 +57,77 @@ public class Character {
 		return combinedVector;
 	}
 	
+	public ArrayList<Chapter> allSolitaryMentions() {
+		return solitaryMentions;
+	}
+	
 	public ArrayList<Character> allCharactersEncountered() {
 		Set<Character> characterSet = new HashSet<Character>();
 		// for all first character meetups, add the second characters
 		Iterator<Meetup> firstCharsMeetupIter = meetupsAsFirstCharacter.iterator();
 		while (firstCharsMeetupIter.hasNext()) {
-			characterSet.add(((Meetup)firstCharsMeetupIter.next()).secondCharacter()); 
+			characterSet.add(firstCharsMeetupIter.next().secondCharacter()); 
 		}
 		// for all second character meetups, add the first character
 		Iterator<Meetup> secondCharsMeetupIter = meetupsAsSecondCharacter.iterator();
 		while (secondCharsMeetupIter.hasNext()) {
-			characterSet.add(((Meetup)secondCharsMeetupIter.next()).firstCharacter()); 
+			characterSet.add(secondCharsMeetupIter.next().firstCharacter()); 
 		}
 		ArrayList<Character> allChars = new ArrayList<Character>();
 		allChars.addAll(characterSet);
 		return allChars;
 	}
 	
-	public ArrayList<Chapter> allChapters() {
+	public ArrayList<Chapter> allChaptersWithMeetups() {
 		Set<Chapter> chapterSet = new HashSet<Chapter>();
 		Iterator<Meetup> chapterMeetupIter = allMeetups().iterator();
 		while((chapterMeetupIter).hasNext()) {
-			chapterSet.add(((Meetup)chapterMeetupIter.next()).chapter());
+			chapterSet.add(chapterMeetupIter.next().chapter());
 		}
 		ArrayList<Chapter> allChapters = new ArrayList<Chapter>();
 		allChapters.addAll(chapterSet);
 		return allChapters;
 	}
 	
-	public ArrayList<String> sortedListOfCharactersEncountered() {
+	public ArrayList<Chapter> allChaptersWithSolitaryMentions() {
+		Set<Chapter> chapterSet = new HashSet<Chapter>();
+		Iterator<Chapter> chapterIter = solitaryMentions.iterator();
+		while(chapterIter.hasNext()) {
+			chapterSet.add(chapterIter.next());
+		}
+		ArrayList<Chapter> allChapters = new ArrayList<Chapter>();
+		allChapters.addAll(chapterSet);
+		return allChapters;
+	}
+	
+	public ArrayList<Chapter> allChaptersAppearingIn() {
+		Set<Chapter> chapterSet = new HashSet<Chapter>();
+		Iterator<Chapter> meetupChaptersIter = allChaptersWithMeetups().iterator(); 
+		while(meetupChaptersIter.hasNext()) {
+			chapterSet.add(meetupChaptersIter.next());
+		}
+		Iterator<Chapter> singleAppearanceChaptersIter = allChaptersWithSolitaryMentions().iterator();
+		while(singleAppearanceChaptersIter.hasNext()) {
+			chapterSet.add(singleAppearanceChaptersIter.next());
+		}
+		ArrayList<Chapter> allChapters = new ArrayList<Chapter>();
+		allChapters.addAll(chapterSet);
+		return allChapters;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ArrayList<String> sortedListOfChaptersWithSolitaryMentions() {
+		ArrayList<String> chapterNames = new ArrayList<String>();
+		Iterator<Chapter> allChaps = allChaptersWithSolitaryMentions().iterator();
+		while(allChaps.hasNext()) {
+			chapterNames.add(allChaps.next().identifier());
+		}
+		Collections.sort(chapterNames, new NaturalOrderComparator());
+		return chapterNames;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ArrayList<String> sortedListOfCharacterIdentifiersEncountered() {
 		ArrayList<String> characterNames = new ArrayList<String>();
 		Iterator<Character> allChars = allCharactersEncountered().iterator();
 		while(allChars.hasNext()) {
@@ -86,9 +137,21 @@ public class Character {
 		return characterNames;
 	}
 	
-	public ArrayList<String> sortedListOfChaptersEncountered() {
+	@SuppressWarnings("unchecked")
+	public ArrayList<String> sortedListOfChapterIdentifiersWithEncounters() {
 		ArrayList<String> chapterNames = new ArrayList<String>();
-		Iterator<Chapter> allChaps = allChapters().iterator();
+		Iterator<Chapter> allChaps = allChaptersWithMeetups().iterator();
+		while(allChaps.hasNext()) {
+			chapterNames.add(allChaps.next().identifier());
+		}
+		Collections.sort(chapterNames, new NaturalOrderComparator());
+		return chapterNames;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ArrayList<String> sortedListOfChapterAppearances() {
+		ArrayList<String> chapterNames = new ArrayList<String>();
+		Iterator<Chapter> allChaps = allChaptersAppearingIn().iterator();
 		while(allChaps.hasNext()) {
 			chapterNames.add(allChaps.next().identifier());
 		}

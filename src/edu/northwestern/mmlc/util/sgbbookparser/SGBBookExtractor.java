@@ -18,7 +18,7 @@ public class SGBBookExtractor {
 	
 	private Hashtable<String, Chapter> chapterTable;
 	private Hashtable<String, Character> characterTable;
-	private Vector<Meetup> allMeetups;
+	private Vector<Meetup> masterListOfMeetups;
 	private Hashtable<String, Vector<Meetup>> characterPairMeetups;
 	private Hashtable<String, Vector<Meetup>> chapterMeetups;
 	private Hashtable<String, Vector<Meetup>> characterMeetups;
@@ -55,7 +55,7 @@ public class SGBBookExtractor {
 
 		chapterTable = new Hashtable<String, Chapter>();
 		characterTable = new Hashtable<String, Character>();
-		allMeetups = new Vector<Meetup>();
+		masterListOfMeetups = new Vector<Meetup>();
 		characterPairMeetups = new Hashtable<String, Vector<Meetup>>();
 		chapterMeetups = new Hashtable<String, Vector<Meetup>>();
 		characterMeetups = new Hashtable<String, Vector<Meetup>>();
@@ -160,11 +160,15 @@ public class SGBBookExtractor {
 						for (int meetupGroupCounter = 0; meetupGroupCounter < meetupGroups.length; meetupGroupCounter++) {
 							// split the meet-up-group into individual participant IDs
 							String[] meetupParticipants = meetupGroups[meetupGroupCounter].split(",");
+							Chapter chapter = existingOrNewChapterWithIdentifier(chapterIdentifier.trim());
 							if (meetupParticipants.length < 2 ) {
-								// not interested in meet-up sizes less than two
+								// we are interested in single appearances, but not as a meet-up
+								if (meetupParticipants[0] != null && meetupParticipants[0].trim().length() > 0) {
+									Character singleCharacter = characterWithIdentifier(meetupParticipants[0]);
+									singleCharacter.addToListOfSolitaryMentions(chapter);
+								}
 							} else {
 								// we want to generate a list of meet-ups: combination of things 2 at a time
-								Chapter chapter = existingOrNewChapterWithIdentifier(chapterIdentifier.trim());
 								for (int outerMeetupCounter = 0; outerMeetupCounter < meetupParticipants.length - 1; outerMeetupCounter++) {
 									for (int innerMeetupCounter = outerMeetupCounter + 1; innerMeetupCounter < meetupParticipants.length; innerMeetupCounter++) {
 										Character char1 = characterWithIdentifier(meetupParticipants[outerMeetupCounter].trim());
@@ -183,10 +187,11 @@ public class SGBBookExtractor {
 										}
 										//System.out.println("Meetup: " + chapter.identifier() + ": " + char1.identifier() + " " + char2.identifier());
 										Meetup newMeetup = new Meetup(chapter, char1, char2);
-										addToAllMeetups(newMeetup);
-										addToCharacterPairMeetups(char1, char2, newMeetup);
+										addToMeetupMasterList(newMeetup);
+
 										
-										// I don't know why I am doing this
+										// I don't know why I am doing these three, since we don't really use them
+										addToCharacterPairMeetups(char1, char2, newMeetup);
 										addToChapterMeetups(chapter, newMeetup);
 										addToCharacterMeetups(char1, newMeetup);
 										addToCharacterMeetups(char2, newMeetup);
@@ -225,7 +230,7 @@ public class SGBBookExtractor {
 	 * generates edge CSV suitable for Gephi
 	 */
 	public String generateEdgeCSV() {
-		Iterator<Meetup> meetupIterator = allMeetups.iterator();
+		Iterator<Meetup> meetupIterator = masterListOfMeetups.iterator();
 		
 		String csv = "Source,Target,Type,Id,Label" + "\n";
 		int lineIDCounter = 0;
@@ -257,15 +262,16 @@ public class SGBBookExtractor {
 				   + "}"+ "\n"
 				   + ");" + "\n"
 				   + "</script>"+ "\n"
-				   + "<table id=\"myTable\" class=\"tablesorter\" style=\"tr.valign='top';\">"+ "\n"
+				   + "<table id=\"myTable\" class=\"tablesorter\" style=\"\">"+ "\n"
 				   + "<thead>"+ "\n"
 				   + "<tr>"+ "\n"
 	               + "<th align=\"left\" width=\"1%\">Abbr.</th>"+ "\n"
-	               + "<th align=\"left\" width=\"1%\">Short Name</th>"+ "\n"
 	               + "<th align=\"left\" width=\"1%\">Long Name</th>"+ "\n"
-	               + "<th align=\"left\" width=\"1%\">Chapter Count</th>"+ "\n"
-	               + "<th align=\"left\" width=\"1%\">Number of Meetups</th>"+ "\n"
-	               + "<th align=\"left\" width=\"1%\">Chapters Encountered</th>"+ "\n"
+	               + "<th align=\"left\" width=\"1%\">Short Name</th>"+ "\n"
+	               + "<th align=\"left\" width=\"1%\">Number of Ecounters with Other Characters</th>"+ "\n"
+	               + "<th align=\"left\" width=\"1%\">Additional Number of Appearances</th>"+ "\n"
+	               + "<th align=\"left\" width=\"1%\">Chapters in which Character Encounters Other Characters</th>"+ "\n"	               
+	               + "<th align=\"left\" width=\"1%\">Chapters in which Character is Simply Mentioned</th>"+ "\n"
 	               + "<th align=\"left\" width=\"1%\">Characters Encountered</th>"+ "\n"
 	               + "</tr>" + "\n"
 	               + "</thead>"+ "\n"
@@ -283,28 +289,36 @@ public class SGBBookExtractor {
 				String csv = "Id,Label,Description" + "\n";
 		while (characterIterator.hasNext()) {
 			Character character = characterIterator.next();
-			// what chapters did this character meet peoeple in
-			StringBuilder chapterListSB = new StringBuilder();
-			Iterator<String> chapterListIterator = character.sortedListOfChaptersEncountered().iterator();
+			// in which chapters was this character simply mentioned
+			StringBuilder chapterListOfSolitaryMentionsSB = new StringBuilder();
+			Iterator<String> solitaryMentionchapterListIterator = character.sortedListOfChaptersWithSolitaryMentions().iterator();
+			while (solitaryMentionchapterListIterator.hasNext()) {
+				if (chapterListOfSolitaryMentionsSB.length() > 0) chapterListOfSolitaryMentionsSB.append(", ");
+				chapterListOfSolitaryMentionsSB.append(solitaryMentionchapterListIterator.next());
+			}
+			// what chapters did this character meet/encounter other people in
+			StringBuilder chapterListWithEncountersSB = new StringBuilder();
+			Iterator<String> chapterListIterator = character.sortedListOfChapterIdentifiersWithEncounters().iterator();
 			while (chapterListIterator.hasNext()) {
-				if (chapterListSB.length() > 0) chapterListSB.append(", ");
-				chapterListSB.append(chapterListIterator.next());
+				if (chapterListWithEncountersSB.length() > 0) chapterListWithEncountersSB.append(", ");
+				chapterListWithEncountersSB.append(chapterListIterator.next());
 			}
 			// what people did this character meet?
 			StringBuilder characterListSB = new StringBuilder();
-			Iterator<String> characterListIterator = character.sortedListOfCharactersEncountered().iterator();
+			Iterator<String> characterListIterator = character.sortedListOfCharacterIdentifiersEncountered().iterator();
 			while (characterListIterator.hasNext()) {
 				if (characterListSB.length() > 0) characterListSB.append(", ");
 				characterListSB.append(characterListIterator.next());
 			}
 			
-			String nextTableRow = "<tr>"
+			String nextTableRow = "<tr style=\"vertical-align:top;\">" + "\n"
 					+ "<td>" + character.identifier() + "</td>" + "\n"
-					+ "<td>" + character.shortName() + "</td>" + "\n"
 					+ "<td>" + character.longName() + "</td>" + "\n"
-					+ "<td>" + character.allChapters().size() + "</td>" + "\n"
+					+ "<td>" + character.shortName() + "</td>" + "\n"
 					+ "<td>" + character.allMeetups().size() + "</td>" + "\n"
-					+ "<td>" + chapterListSB.toString() + "</td>" + "\n"
+					+ "<td>" + character.allSolitaryMentions().size() + "</td>" + "\n"
+					+ "<td>" + chapterListWithEncountersSB.toString() + "</td>" + "\n"
+					+ "<td>" + chapterListOfSolitaryMentionsSB.toString() + "</td>" + "\n"
 					+ "<td>" + characterListSB.toString() + "</td>" + "\n";
 			
 			innerTableBody += nextTableRow;
@@ -376,8 +390,8 @@ public class SGBBookExtractor {
 		return possibleResult;
 	}
 	
-	private void addToAllMeetups(Meetup meetup) {
-		allMeetups.add(meetup);
+	private void addToMeetupMasterList(Meetup meetup) {
+		masterListOfMeetups.add(meetup);
 	}
 	
 	private void addToCharacterPairMeetups(Character char1, Character char2, Meetup meetup) {
