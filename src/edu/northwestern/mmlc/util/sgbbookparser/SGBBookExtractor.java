@@ -160,7 +160,10 @@ public class SGBBookExtractor {
 							if (meetupParticipants.length < 2 ) {
 								// we are interested in single appearances, but not as a meet-up
 								if (meetupParticipants[0] != null && meetupParticipants[0].trim().length() > 0) {
-									Character singleCharacter = characterWithIdentifier(meetupParticipants[0]);
+									Character singleCharacter = characterWithIdentifier(meetupParticipants[0].trim());
+									if(singleCharacter == null) {
+										throw new Exception("No character found with identifier: " + meetupParticipants[0].trim());
+									}
 									singleCharacter.addToListOfSolitaryMentions(chapter);
 								}
 							} else {
@@ -256,7 +259,7 @@ public class SGBBookExtractor {
 				   + "</script>"+ "\n"
 				   + "<table id=\"myTable\" class=\"tablesorter\" style=\"\">"+ "\n"
 				   + "<thead>"+ "\n"
-				   + "<tr>"+ "\n"
+				   + "<tr valign=bottom>"+ "\n"
 	               + "<th align=\"left\" width=\"1%\">Abbr.</th>"+ "\n"
 	               + "<th align=\"left\" width=\"1%\">Long Name</th>"+ "\n"
 	               + "<th align=\"left\" width=\"1%\">Short Name</th>"+ "\n"
@@ -303,7 +306,7 @@ public class SGBBookExtractor {
 				characterListSB.append(characterListIterator.next());
 			}
 			
-			String nextTableRow = "<tr style=\"vertical-align:top;\">" + "\n"
+			String nextTableRow = "<tr valign=top>" + "\n"
 					+ "<td>" + character.identifier() + "</td>" + "\n"
 					+ "<td>" + character.longName() + "</td>" + "\n"
 					+ "<td>" + character.shortName() + "</td>" + "\n"
