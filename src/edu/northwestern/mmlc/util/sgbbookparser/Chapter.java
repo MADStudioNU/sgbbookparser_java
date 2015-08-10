@@ -1,16 +1,22 @@
 package edu.northwestern.mmlc.util.sgbbookparser;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
 
 public class Chapter implements Comparable<Chapter> {
 	private String identifier;
-	private Vector<Meetup> meetupList;
+	private ArrayList<Meetup> meetupList;
+	private ArrayList<Character> solitaryMentions;
 	
 	public Chapter(String newIdentifier) {
 		identifier = newIdentifier;
-		meetupList = new Vector<Meetup>();
+		meetupList = new ArrayList<Meetup>();
+		solitaryMentions = new ArrayList<Character>();
 	}
 	
 	public String identifier() {
@@ -21,6 +27,35 @@ public class Chapter implements Comparable<Chapter> {
 		// TODO Auto-generated method stub
 		meetupList.add(meetup);
 	}
+	
+	public void addToSolitaryMentions(Character newCharacter) {
+	        solitaryMentions.add(newCharacter);
+	}
+
+
+	public ArrayList<Meetup> allMeetups()
+	{
+		ArrayList<Meetup> combinedVector = new ArrayList<Meetup>();
+		combinedVector.addAll(meetupList);
+		return combinedVector;
+	    }
+
+	public ArrayList<Character> listOfCharacters() {
+		Set<Character> characterSet = new HashSet<Character>();
+        Meetup meetupTemp;
+        for(Iterator<Meetup> meetupIterator = meetupList.iterator(); meetupIterator.hasNext(); characterSet.add(meetupTemp.secondCharacter()))
+        {
+            meetupTemp = (Meetup)meetupIterator.next();
+            characterSet.add(meetupTemp.firstCharacter());
+        }
+
+        for(Iterator<Character> solitaryMentionsIterator = solitaryMentions.iterator(); solitaryMentionsIterator.hasNext(); characterSet.add((Character)solitaryMentionsIterator.next()));
+        ArrayList<Character> allCharacters = new ArrayList<Character>();
+        allCharacters.addAll(characterSet);
+        return allCharacters;
+
+	}
+	
 	
 	public int compareTo(Chapter compcomparisonChapter) {		 
 		// basic sorting (not natural sort)
