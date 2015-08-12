@@ -13,19 +13,21 @@ public class Character {
 	private String shortName;
 	private String longName;
 	// where the character is the first character of a pair of characters meeting
-	private ArrayList<Meetup> meetupsAsFirstCharacter;
+	private ArrayList<MeetupPair> meetupsAsFirstCharacter;
 	// where the character is the second character of a pair of characters meeting
-	private ArrayList<Meetup> meetupsAsSecondCharacter;
+	private ArrayList<MeetupPair> meetupsAsSecondCharacter;
 	// a list of single occurrences (solitary mentions) for the character
 	private ArrayList<Chapter> solitaryMentions;
+	private ArrayList<CharacterGroupEvent> characterGroupEventList;
 		
 	public Character(String newIdentifier, String newShortName, String newLongName) {
 		identifier = newIdentifier;
 		shortName = newShortName;
 		longName = newLongName;
-		meetupsAsFirstCharacter = new ArrayList<Meetup>();
-		meetupsAsSecondCharacter = new ArrayList<Meetup>();
+		meetupsAsFirstCharacter = new ArrayList<MeetupPair>();
+		meetupsAsSecondCharacter = new ArrayList<MeetupPair>();
 		solitaryMentions = new ArrayList<Chapter>();
+		characterGroupEventList = new ArrayList<CharacterGroupEvent>();
 	}
 	
 	public String identifier() {
@@ -38,20 +40,30 @@ public class Character {
 		return longName;
 	}
 
-	public void addToMeetupsAsFirstCharacter(Meetup meetup) {
-		meetupsAsFirstCharacter.add(meetup);
+	public void addToMeetupsAsFirstCharacter(MeetupPair meetupPair) {
+		meetupsAsFirstCharacter.add(meetupPair);
 	}
 
-	public void addToMeetupsAsSecondCharacter(Meetup meetup) {
-		meetupsAsSecondCharacter.add(meetup);
+	public void addToMeetupsAsSecondCharacter(MeetupPair meetupPair) {
+		meetupsAsSecondCharacter.add(meetupPair);
 	}
 	
 	public void addToListOfSolitaryMentions(Chapter chapter) {
 		solitaryMentions.add(chapter);
 	}
 	
-	public ArrayList<Meetup> allMeetups() {
-		ArrayList<Meetup> combinedVector = new ArrayList<Meetup>();
+	public void addToCharacterGroupEventList(CharacterGroupEvent groupEvent) {
+		characterGroupEventList.add(groupEvent);
+	}
+	
+	public ArrayList<CharacterGroupEvent> listOfCharacterGroupEvents() {
+		ArrayList<CharacterGroupEvent> combinedVector = new ArrayList<CharacterGroupEvent>();
+		combinedVector.addAll(characterGroupEventList);
+		return combinedVector;
+	}
+	
+	public ArrayList<MeetupPair> allMeetups() {
+		ArrayList<MeetupPair> combinedVector = new ArrayList<MeetupPair>();
 		combinedVector.addAll(meetupsAsFirstCharacter);
 		combinedVector.addAll(meetupsAsSecondCharacter);
 		return combinedVector;
@@ -64,12 +76,12 @@ public class Character {
 	public ArrayList<Character> allCharactersEncountered() {
 		Set<Character> characterSet = new HashSet<Character>();
 		// for all first character meetups, add the second characters
-		Iterator<Meetup> firstCharsMeetupIter = meetupsAsFirstCharacter.iterator();
+		Iterator<MeetupPair> firstCharsMeetupIter = meetupsAsFirstCharacter.iterator();
 		while (firstCharsMeetupIter.hasNext()) {
 			characterSet.add(firstCharsMeetupIter.next().secondCharacter()); 
 		}
 		// for all second character meetups, add the first character
-		Iterator<Meetup> secondCharsMeetupIter = meetupsAsSecondCharacter.iterator();
+		Iterator<MeetupPair> secondCharsMeetupIter = meetupsAsSecondCharacter.iterator();
 		while (secondCharsMeetupIter.hasNext()) {
 			characterSet.add(secondCharsMeetupIter.next().firstCharacter()); 
 		}
@@ -80,7 +92,7 @@ public class Character {
 	
 	public ArrayList<Chapter> allChaptersWithMeetups() {
 		Set<Chapter> chapterSet = new HashSet<Chapter>();
-		Iterator<Meetup> chapterMeetupIter = allMeetups().iterator();
+		Iterator<MeetupPair> chapterMeetupIter = allMeetups().iterator();
 		while((chapterMeetupIter).hasNext()) {
 			chapterSet.add(chapterMeetupIter.next().chapter());
 		}

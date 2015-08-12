@@ -1,15 +1,16 @@
 package edu.northwestern.mmlc.util.sgbbookparser;
 
 
+// meetup pairs represent the deconstruction of a meetup into combination tuples of two nodes
 // in general, a meetup should always be stored with the lowest order character first
 
-public class Meetup {
+public class MeetupPair {
 
 	private Chapter chapter;
 	private Character firstCharacter;
 	private Character secondCharacter;
 
-	public Meetup(Chapter newChapter, Character newFirstCharacter, Character newSecondCharacter) {
+	public MeetupPair(Chapter newChapter, Character newFirstCharacter, Character newSecondCharacter) {
 		chapter = newChapter;
 		firstCharacter = newFirstCharacter;
 		secondCharacter = newSecondCharacter;
