@@ -286,6 +286,7 @@ public class SGBBookExtractor {
 				   + "<title>Character Data</title>"+ "\n"
 				   + "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js\"></script>" + "\n"
 				   + "<script type=\"text/javascript\" src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.5/js/jquery.tablesorter.js\"></script>" + "\n"
+				   + "<script type=\"text/javascript\" src=\"https://cdnjs.cloudflare.com/ajax/libs/floatthead/1.2.13/jquery.floatThead.min.js\"></script>" + "\n"
 				   + "</head>"+ "\n"
 				   + "<body>"+ "\n"
 				   + "<script type=\"text/javascript\">"+ "\n"
@@ -377,6 +378,7 @@ public class SGBBookExtractor {
 				   + "<title>Chapter Data</title>"+ "\n"
 				   + "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js\"></script>" + "\n"
 				   + "<script type=\"text/javascript\" src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.5/js/jquery.tablesorter.js\"></script>" + "\n"
+				   + "<script type=\"text/javascript\" src=\"https://cdnjs.cloudflare.com/ajax/libs/floatthead/1.2.13/jquery.floatThead.min.js\"></script>" + "\n"
 				   + "</head>"+ "\n"
 				   + "<body>"+ "\n"
 				   + "<script type=\"text/javascript\">"+ "\n"
@@ -557,7 +559,7 @@ public class SGBBookExtractor {
 	}
 	
 	private String idifyString(String type, String inString) {
-		inString.replaceAll(".", "_");
+		inString = inString.replaceAll("\\.", "_");
 		return type.trim() + "_" + inString.trim();
 	}
 
