@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.StringReader;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -276,7 +277,7 @@ public class SGBBookExtractor {
 	}
 	
 	public String generateHTMLCharacterTable(String myFilePath, String filePathToChapterTable) {
-		String CHAPTERTABLEURI = new File(myFilePath).toURI().relativize(new File(filePathToChapterTable).toURI()).getPath();
+		String CHAPTERTABLEURI = new File(myFilePath).getParentFile().toURI().relativize(new File(filePathToChapterTable).toURI()).getPath();
 
 		String htmlPreamble = "<html>" + "\n"
 				   + "<head>" + "\n"
@@ -367,7 +368,7 @@ public class SGBBookExtractor {
 	
 	@SuppressWarnings("unchecked")
 	public String generateHTMLChapterTable(String myFilePath, String filePathToCharacterTable) {
-		String CHARACTERTABLEURI = new File(myFilePath).toURI().relativize(new File(filePathToCharacterTable).toURI()).getPath();
+		String CHARACTERTABLEURI = new File(myFilePath).getParentFile().toURI().relativize(new File(filePathToCharacterTable).toURI()).getPath();
 		
 		String htmlPreamble = "<html>" + "\n"
 				   + "<head>" + "\n"
