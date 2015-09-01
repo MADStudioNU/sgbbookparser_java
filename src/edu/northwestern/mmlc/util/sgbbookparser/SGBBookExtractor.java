@@ -326,7 +326,7 @@ public class SGBBookExtractor {
         @SuppressWarnings("unused")
 		int count = 1;
 		while (sortedCharacterIdentifierIterator.hasNext()) {
-			Character character = characterTable.get(characterIterator.next());
+			Character character = characterTable.get(sortedCharacterIdentifierIterator.next());
 			Set<Chapter> chaptersWhereCharacterAppears = new HashSet<Chapter>();
 			// in which chapters was this character simply mentioned
 			StringBuilder chapterListOfSolitaryMentionsSB = new StringBuilder();
