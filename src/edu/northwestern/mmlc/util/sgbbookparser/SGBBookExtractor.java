@@ -1,6 +1,6 @@
 package edu.northwestern.mmlc.util.sgbbookparser;
+/* imports */
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -14,10 +14,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
-
-import javax.print.attribute.HashDocAttributeSet;
-
-/* imports */
 
 public class SGBBookExtractor {
 	
@@ -276,6 +272,7 @@ public class SGBBookExtractor {
 		return csv;	
 	}
 	
+	@SuppressWarnings("unchecked")
 	public String generateHTMLCharacterTable(String myFilePath, String filePathToChapterTable) {
 		String CHAPTERTABLEURI = new File(myFilePath).getParentFile().toURI().relativize(new File(filePathToChapterTable).toURI()).getPath();
 
@@ -316,12 +313,20 @@ public class SGBBookExtractor {
 		
 		String innerTableBody = "";
 		
-		// build the table by the list of all characters
+		// build the table by the list of all characters but sort them first
+		
 		Collection<Character> characters = characterTable.values();
 		Iterator<Character> characterIterator = characters.iterator();
-        int count = 1;
-		while (characterIterator.hasNext()) {
-			Character character = characterIterator.next();
+		ArrayList<String> sortedCharacterIdentifiers = new ArrayList<String>();
+		while(characterIterator.hasNext()) {
+			sortedCharacterIdentifiers.add(characterIterator.next().identifier());
+		}
+		Collections.sort(sortedCharacterIdentifiers, new NaturalOrderComparator());
+		Iterator<String> sortedCharacterIdentifierIterator = sortedCharacterIdentifiers.iterator(); 
+        @SuppressWarnings("unused")
+		int count = 1;
+		while (sortedCharacterIdentifierIterator.hasNext()) {
+			Character character = characterTable.get(characterIterator.next());
 			Set<Chapter> chaptersWhereCharacterAppears = new HashSet<Chapter>();
 			// in which chapters was this character simply mentioned
 			StringBuilder chapterListOfSolitaryMentionsSB = new StringBuilder();
@@ -414,7 +419,8 @@ public class SGBBookExtractor {
         	sortedChapterIdentifiers.add(chapterIterator.next().identifier());        	
         }
         Collections.sort(sortedChapterIdentifiers, new NaturalOrderComparator());
-        int count = 1;
+        @SuppressWarnings("unused")
+		int count = 1;
         for(Iterator<String> sortedChapterIdentifierIter = sortedChapterIdentifiers.iterator(); sortedChapterIdentifierIter.hasNext();)
         {
         	// build, ultimately, a StringBuffer of encountered characters sorted by natural order comparison
