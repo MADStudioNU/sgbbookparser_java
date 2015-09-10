@@ -160,8 +160,10 @@ public class SGBBookExtractor {
 	}
 	
 	private void populateMeetupAndChapterTables(Vector<String> meetupData) throws Exception {
+		int meetupDataLineCount = 0;
 		Iterator<String> meetupDataIterator = meetupData.iterator();
 		while (meetupDataIterator.hasNext()) {
+			meetupDataLineCount++;
 			String chapterAndMeetupString = meetupDataIterator.next();
 			if (chapterAndMeetupString != null) {
 				if(chapterAndMeetupString.contains(":")) {
@@ -182,7 +184,7 @@ public class SGBBookExtractor {
 							for (int groupMeetupParticipantIndex = 0; groupMeetupParticipantIndex < meetupParticipants.length; groupMeetupParticipantIndex++) {
 								Character singleCharacter = characterWithIdentifier(meetupParticipants[groupMeetupParticipantIndex].trim());
 								if(singleCharacter == null) {
-									throw new Exception("No character found with identifier: " + meetupParticipants[0].trim());
+									throw new Exception("No character found with identifier: " + meetupParticipants[groupMeetupParticipantIndex].trim() + " (on meetup data line: " + meetupDataLineCount + ")");
 								}
 								newCharacterGroupEvent.addCharacter(singleCharacter);
 							}
@@ -192,7 +194,7 @@ public class SGBBookExtractor {
 								//if (meetupParticipants[0] != null && meetupParticipants[0].trim().length() > 0) { }
 								Character singleCharacter = newCharacterGroupEvent.allCharacters().get(0);
 								if(singleCharacter == null) {
-										throw new Exception("No character found with identifier: " + meetupParticipants[0].trim());
+										throw new Exception("No character found with identifier: " + meetupParticipants[0].trim() + " (on meetup data line: " + meetupDataLineCount + ")" );
 								}
 								singleCharacter.addToListOfSolitaryMentions(chapter);
 								chapter.addToSolitaryMentions(singleCharacter);
@@ -207,7 +209,7 @@ public class SGBBookExtractor {
 										Character char1 = newCharacterGroupEvent.allCharacters().get(outerMeetupCounter);
 										Character char2 = newCharacterGroupEvent.allCharacters().get(innerMeetupCounter);
 										if (char1 == null || char2 == null) {
-											throw new Exception("One or more characters not found in character table.");
+											throw new Exception("One or more characters not found in character table." + " (on meetup data line: " + meetupDataLineCount + ")");
 										}
 										if (char1.compareTo(char2) > 0) {
 											// swap the order by alphabet
@@ -292,7 +294,7 @@ public class SGBBookExtractor {
 				   + "}"+ "\n"
 				   + ");" + "\n"
 				   + "</script>"+ "\n"
-				   + "<table id=\"myTable\" class=\"tablesorter\" style=\"\">"+ "\n"
+				   + "<table border=\"1\" id=\"myTable\" class=\"tablesorter\" style=\"\">"+ "\n"
 				   + "<thead>"+ "\n"
 				   + "<tr valign=bottom>"+ "\n"
 	               + "<th align=\"left\" width=\"1%\">Abbreviation</th>"+ "\n"
@@ -391,7 +393,7 @@ public class SGBBookExtractor {
 				   + "}"+ "\n"
 				   + ");" + "\n"
 				   + "</script>"+ "\n"
-				   + "<table id=\"myTable\" class=\"tablesorter\" style=\"\">"+ "\n"
+				   + "<table border=\"1\" id=\"myTable\" class=\"tablesorter\" style=\"\">"+ "\n"
 				   + "<thead>"+ "\n"
 				   + "<tr valign=bottom>"+ "\n"
 	               // + "<th align=\"left\" width=\"1%\">Sequence</th>"+ "\n" 
