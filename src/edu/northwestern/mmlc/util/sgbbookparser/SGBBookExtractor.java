@@ -321,7 +321,14 @@ public class SGBBookExtractor {
 		Iterator<Chapter> chapterListIterator = chapterList.iterator();
 		while (chapterListIterator.hasNext()) {
 			Chapter nextChapter = chapterListIterator.next();
-			charactersEncountered.addAll(nextChapter.listOfCharacters());			
+			ArrayList<MeetupPair> meetupPairsEncountered = new ArrayList<MeetupPair>();
+			Iterator<MeetupPair> meetupPairIterator = meetupPairsEncountered.iterator();
+			while (meetupPairIterator.hasNext()) {
+				MeetupPair nextMeetupPair = meetupPairIterator.next();
+				charactersEncountered.add(nextMeetupPair.firstCharacter());
+				charactersEncountered.add(nextMeetupPair.secondCharacter());
+			}
+						
 		}
 
 		Iterator<Character> characterIterator = charactersEncountered.iterator();
