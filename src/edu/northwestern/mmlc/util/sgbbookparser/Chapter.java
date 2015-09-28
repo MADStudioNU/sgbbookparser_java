@@ -26,7 +26,6 @@ public class Chapter implements Comparable<Chapter> {
 	}
 
 	public void addToMeetupList(MeetupPair meetupPair) {
-		// TODO Auto-generated method stub
 		meetupPairList.add(meetupPair);
 	}
 	

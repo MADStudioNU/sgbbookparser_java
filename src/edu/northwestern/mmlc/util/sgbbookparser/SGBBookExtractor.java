@@ -32,6 +32,8 @@ public class SGBBookExtractor {
         String PATH_TO_EDGE_CSV = null;
         String PATH_TO_CHARACTER_TABLE_OUTPUT = null;
         String PATH_TO_CHAPTER_TABLE_OUTPUT = null;
+        String REGEX_EXPRESSION = null;
+        boolean useFilterRatherThanWholeDataset = false;
         try
         {
             PATH_TO_SGB_FILE = args[0];
@@ -39,10 +41,14 @@ public class SGBBookExtractor {
             PATH_TO_EDGE_CSV = args[2];
             PATH_TO_CHARACTER_TABLE_OUTPUT = args[3];
             PATH_TO_CHAPTER_TABLE_OUTPUT = args[4];
+            if (args.length == 6) {
+            	REGEX_EXPRESSION = args[5];
+            	useFilterRatherThanWholeDataset = true;
+            }
         }
         catch(Exception e)
         {
-            System.err.println("java -jar sgbbookparser.jar PATH_TO_SGB_FILE.dat PATH_TO_NODE_CSV_OUTPUT.csv PATH_TO_EDGE_CSV_OUTPUT.csv PATH_TO_CHARACTER_TABLE_OUTPUT.html PATH_TO_CHAPTER_TABLE_OUTPUT.html");
+            System.err.println("java -jar sgbbookparser.jar PATH_TO_SGB_FILE.dat PATH_TO_NODE_CSV_OUTPUT.csv PATH_TO_EDGE_CSV_OUTPUT.csv PATH_TO_CHARACTER_TABLE_OUTPUT.html PATH_TO_CHAPTER_TABLE_OUTPUT.html [Regular Expression For Subset Chapter Report]");
             System.exit(1);
         }
         try
@@ -56,8 +62,13 @@ public class SGBBookExtractor {
         }
         try
         {
-            writeFile(PATH_TO_NODE_CSV, bookProcessor.generateNodeCSV());
-            writeFile(PATH_TO_EDGE_CSV, bookProcessor.generateEdgeCSV());
+        	if (useFilterRatherThanWholeDataset) {
+                writeFile(PATH_TO_NODE_CSV, bookProcessor.generateNodeCSVForChapterIDPatternMatch(REGEX_EXPRESSION));
+                writeFile(PATH_TO_EDGE_CSV, bookProcessor.generateEdgeCSVForChapterIDPatternMatch(REGEX_EXPRESSION));
+        	} else {
+                writeFile(PATH_TO_NODE_CSV, bookProcessor.generateNodeCSV());
+                writeFile(PATH_TO_EDGE_CSV, bookProcessor.generateEdgeCSV());
+        	}
             writeFile(PATH_TO_CHARACTER_TABLE_OUTPUT, bookProcessor.generateHTMLCharacterTable(PATH_TO_CHARACTER_TABLE_OUTPUT, PATH_TO_CHAPTER_TABLE_OUTPUT));
             writeFile(PATH_TO_CHAPTER_TABLE_OUTPUT, bookProcessor.generateHTMLChapterTable(PATH_TO_CHAPTER_TABLE_OUTPUT, PATH_TO_CHARACTER_TABLE_OUTPUT));
         }
