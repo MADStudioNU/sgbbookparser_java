@@ -9,6 +9,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -273,6 +274,82 @@ public class SGBBookExtractor {
 		}
 		return csv;	
 	}
+	
+	@SuppressWarnings("unchecked")
+	public ArrayList<Chapter> chaptersMatchingChapterIDRegex(String regexPattern) {
+		Set<String> matchingChapterIDs = new HashSet<String>();
+		
+		// add chapter table keys to arrayList for more facile manipulation
+		Enumeration<String> chapterTableEnum=chapterTable.keys();
+		while (chapterTableEnum.hasMoreElements()) {
+			String chapIDIter = chapterTableEnum.nextElement();
+			if (chapIDIter.matches(regexPattern)) {
+				matchingChapterIDs.add(chapIDIter);
+			}
+		}
+		ArrayList<String>sortedListOfMatchingChapterIDs = new ArrayList<String>();
+		sortedListOfMatchingChapterIDs.addAll(matchingChapterIDs);
+		
+		Collections.sort(sortedListOfMatchingChapterIDs, new NaturalOrderComparator());
+		
+		// now, get the chapters...
+		ArrayList<Chapter> chapterList = new ArrayList<Chapter>();
+		Iterator<String> chapterIDIterator = sortedListOfMatchingChapterIDs.iterator();
+		while (chapterIDIterator.hasNext()) {
+			String chapterIDString = chapterIDIterator.next();
+			Chapter matchingChapter = chapterTable.get(chapterIDString);
+			chapterList.add(matchingChapter);
+		}
+		
+		return chapterList;
+	}
+	
+	public String generateNodeCSVForChapterIDPatternMatch(String regexPattern) {
+		ArrayList<Chapter> chapterList = chaptersMatchingChapterIDRegex(regexPattern);
+		Set<Character> charactersEncountered = new HashSet<Character>();
+		Iterator<Chapter> chapterListIterator = chapterList.iterator();
+		while (chapterListIterator.hasNext()) {
+			Chapter nextChapter = chapterListIterator.next();
+			charactersEncountered.addAll(nextChapter.listOfCharacters());			
+		}
+
+		Iterator<Character> characterIterator = charactersEncountered.iterator();
+		
+		String csv = "Id,Label,Description" + "\n";
+		while (characterIterator.hasNext()) {
+			Character character = characterIterator.next();
+			csv += ( "\"" + character.identifier() + "\",\"" + character.shortName().trim() + "\",\"" + character.longName().trim() + "\"" + "\n");
+		}
+		return csv;
+	}
+	
+	public String generateEdgeCSVForChapterIDPatternMatch(String regexPattern) {
+		ArrayList<Chapter> chapterList = chaptersMatchingChapterIDRegex(regexPattern);
+		ArrayList<MeetupPair> meetupPairsEncountered = new ArrayList<MeetupPair>();
+		Iterator<Chapter> chapterListIterator = chapterList.iterator();
+		while (chapterListIterator.hasNext()) {
+			Chapter nextChapter = chapterListIterator.next();
+			meetupPairsEncountered.addAll(nextChapter.allMeetups());
+		}
+		
+		Iterator<MeetupPair> meetupIterator = meetupPairsEncountered.iterator();
+		
+		String csv = "Source,Target,Type,Id,Label" + "\n";
+		int lineIDCounter = 0;
+		while(meetupIterator.hasNext()) {
+			lineIDCounter++;
+			MeetupPair meetupPair = meetupIterator.next();
+			csv += ( "\"" + meetupPair.firstCharacter().identifier().trim() + "\",\"" 
+					+ meetupPair.secondCharacter().identifier().trim() + "\",\""
+					+ "Undirected" + "\",\""
+					+ lineIDCounter + "\",\""
+					+ meetupPair.chapter().identifier() + "\""
+					+ "\n");
+		}
+		return csv;	
+	}
+	
+	
 	
 	@SuppressWarnings("unchecked")
 	public String generateHTMLCharacterTable(String myFilePath, String filePathToChapterTable) {
