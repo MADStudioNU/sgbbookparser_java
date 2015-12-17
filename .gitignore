@@ -1,2 +1,10 @@
 .DS_Store
 
+# IntelliJ .idea stuff
+.idea
+
+# SK
+bin
+classes
+sgbbookparser.iml
+src/META-INF

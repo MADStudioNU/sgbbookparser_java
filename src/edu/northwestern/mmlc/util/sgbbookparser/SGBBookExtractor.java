@@ -68,10 +68,11 @@ public class SGBBookExtractor {
         	} else {
                 writeFile(PATH_TO_NODE_CSV, bookProcessor.generateNodeCSV());
                 writeFile(PATH_TO_EDGE_CSV, bookProcessor.generateEdgeCSV());
+				writeFile(PATH_TO_CHARACTER_TABLE_OUTPUT, bookProcessor.generateHTMLCharacterTable(PATH_TO_CHARACTER_TABLE_OUTPUT, PATH_TO_CHAPTER_TABLE_OUTPUT));
+				writeFile(PATH_TO_CHAPTER_TABLE_OUTPUT, bookProcessor.generateHTMLChapterTable(PATH_TO_CHAPTER_TABLE_OUTPUT, PATH_TO_CHARACTER_TABLE_OUTPUT));
         	}
-            writeFile(PATH_TO_CHARACTER_TABLE_OUTPUT, bookProcessor.generateHTMLCharacterTable(PATH_TO_CHARACTER_TABLE_OUTPUT, PATH_TO_CHAPTER_TABLE_OUTPUT));
-            writeFile(PATH_TO_CHAPTER_TABLE_OUTPUT, bookProcessor.generateHTMLChapterTable(PATH_TO_CHAPTER_TABLE_OUTPUT, PATH_TO_CHARACTER_TABLE_OUTPUT));
-        }
+            System.out.println("Completed!");
+		}
         catch(Exception e)
         {
             System.err.println("Can't write one or more output files");
@@ -79,6 +80,7 @@ public class SGBBookExtractor {
             System.exit(1);
         }
     }
+
 	public SGBBookExtractor(String sourceFileData) {
 
 		chapterTable = new Hashtable<String, Chapter>();
@@ -366,12 +368,12 @@ public class SGBBookExtractor {
 		}
 		return csv;	
 	}
-	
-	
-	
+
 	@SuppressWarnings("unchecked")
 	public String generateHTMLCharacterTable(String myFilePath, String filePathToChapterTable) {
-		String CHAPTERTABLEURI = new File(myFilePath).getParentFile().toURI().relativize(new File(filePathToChapterTable).toURI()).getPath();
+
+//        String CHAPTERTABLEURI = new File(myFilePath).getParentFile().toURI().relativize(new File(filePathToChapterTable).toURI()).getPath();
+        String CHAPTERTABLEURI = "";
 
 		String htmlPreamble = "<html>" + "\n"
 				   + "<head>" + "\n"
@@ -389,16 +391,17 @@ public class SGBBookExtractor {
 				   + "}"+ "\n"
 				   + ");" + "\n"
 				   + "</script>"+ "\n"
-				   + "<table border=\"1\" id=\"myTable\" class=\"tablesorter\" style=\"\">"+ "\n"
+				   + "<table id=\"lm_table-characters\" class=\"tablesorter lm_table lm_table-characters\" style=\"\">"+ "\n"
 				   + "<thead>"+ "\n"
 				   + "<tr valign=bottom>"+ "\n"
-	               + "<th align=\"left\" width=\"1%\">Abbreviation</th>"+ "\n"
+	               + "<th align=\"left\" width=\"1%\">Code</th>"+ "\n"
 	               + "<th align=\"left\" width=\"1%\">Name</th>"+ "\n"
 	               + "<th align=\"left\" width=\"1%\">Description</th>"+ "\n"
 	               + "<th align=\"left\" width=\"1%\">Number of Chapters in which Character Appears</th>"+ "\n"
-	               + "<th align=\"left\" width=\"1%\">Number of Ecounters</th>"+ "\n"
-	               + "<th align=\"left\" width=\"1%\">Chapters Where Encounters Occur</th>"+ "\n"	               
-	               + "<th align=\"left\" width=\"1%\">Characters Encountered</th>"+ "\n"
+	               + "<th align=\"left\" width=\"1%\">Number of Encounters</th>"+ "\n"
+	               + "<th align=\"left\" width=\"1%\">Chapters Where Encounters Occur</th>"+ "\n"
+                   + "<th align=\"left\" width=\"1%\">Number of Characters Encountered</th>"+ "\n"
+                   + "<th align=\"left\" width=\"1%\">Characters Encountered</th>"+ "\n"
 	               + "</tr>" + "\n"
 	               + "</thead>"+ "\n"
 	               + "<tbody>"+ "\n";
@@ -414,11 +417,13 @@ public class SGBBookExtractor {
 		Collection<Character> characters = characterTable.values();
 		Iterator<Character> characterIterator = characters.iterator();
 		ArrayList<String> sortedCharacterIdentifiers = new ArrayList<String>();
+
 		while(characterIterator.hasNext()) {
 			sortedCharacterIdentifiers.add(characterIterator.next().identifier());
 		}
 		Collections.sort(sortedCharacterIdentifiers, new NaturalOrderComparator());
-		Iterator<String> sortedCharacterIdentifierIterator = sortedCharacterIdentifiers.iterator(); 
+		Iterator<String> sortedCharacterIdentifierIterator = sortedCharacterIdentifiers.iterator();
+
         @SuppressWarnings("unused")
 		int count = 1;
 		while (sortedCharacterIdentifierIterator.hasNext()) {
@@ -427,28 +432,35 @@ public class SGBBookExtractor {
 			// in which chapters was this character simply mentioned
 			StringBuilder chapterListOfSolitaryMentionsSB = new StringBuilder();
 			Iterator<String> solitaryMentionchapterListIterator = character.sortedListOfChaptersWithSolitaryMentions().iterator();
+
 			while (solitaryMentionchapterListIterator.hasNext()) {
 				if (chapterListOfSolitaryMentionsSB.length() > 0) chapterListOfSolitaryMentionsSB.append(", ");
 				String chapterIdentifierIter = solitaryMentionchapterListIterator.next();
 				chapterListOfSolitaryMentionsSB.append("<a href=\"" + CHAPTERTABLEURI + "#" + idifyString("chapter", chapterIdentifierIter) + "\"" + ">" + chapterIdentifierIter + "</a>");
 				chaptersWhereCharacterAppears.add(chapterTable.get(chapterIdentifierIter));
 			}
+
 			// what chapters did this character meet/encounter other people in
 			StringBuilder chapterListWithEncountersSB = new StringBuilder();
 			Iterator<String> chapterListIterator = character.sortedListOfChapterIdentifiersWithEncounters().iterator();
+
 			while (chapterListIterator.hasNext()) {
 				if (chapterListWithEncountersSB.length() > 0) chapterListWithEncountersSB.append(", ");
 				String chapterIdentifierIterator = chapterListIterator.next();
 				chapterListWithEncountersSB.append("<a href=\"" + CHAPTERTABLEURI + "#" + idifyString("chapter", chapterIdentifierIterator) + "\"" + ">" + chapterIdentifierIterator + "</a>");
 				chaptersWhereCharacterAppears.add(chapterTable.get(chapterIdentifierIterator));
 			}
+
 			// what people did this character meet?
 			StringBuilder characterListSB = new StringBuilder();
+            int peopleCounter = 0;
 			Iterator<String> characterListIterator = character.sortedListOfCharacterIdentifiersEncountered().iterator();
+
 			while (characterListIterator.hasNext()) {
 				if (characterListSB.length() > 0) characterListSB.append(", ");
 				String characterIdentifier = characterListIterator.next();			
-				characterListSB.append("<span title=\"" + characterTable.get(characterIdentifier).longName() + "\">" + characterIdentifier + "</span>"); 
+				characterListSB.append("<span title=\"" + characterTable.get(characterIdentifier).longName() + "\">" + characterIdentifier + "</span>");
+                peopleCounter++;
 			}
 			
 			String nextTableRow = "<tr valign=top id=\"" + idifyString("character", character.identifier()) + "\" data-character=\"" + character.identifier() + "\"" + ">" + "\n"
@@ -458,8 +470,9 @@ public class SGBBookExtractor {
 					+ "<td>" + (chaptersWhereCharacterAppears.size()) + "</td>" + "\n"
 					+ "<td>" + character.allMeetups().size() + "</td>" + "\n"
 					+ "<td>" + chapterListWithEncountersSB.toString() + "</td>" + "\n"
+					+ "<td>" + peopleCounter + "</td>" + "\n"
 					+ "<td>" + characterListSB.toString() + "</td>" + "\n";
-			
+
 			innerTableBody += nextTableRow;
 			count++;
 		}
@@ -470,8 +483,10 @@ public class SGBBookExtractor {
 	
 	@SuppressWarnings("unchecked")
 	public String generateHTMLChapterTable(String myFilePath, String filePathToCharacterTable) {
-		String CHARACTERTABLEURI = new File(myFilePath).getParentFile().toURI().relativize(new File(filePathToCharacterTable).toURI()).getPath();
-		
+
+//		String CHARACTERTABLEURI = new File(myFilePath).getParentFile().toURI().relativize(new File(filePathToCharacterTable).toURI()).getPath();
+		String CHARACTERTABLEURI = "";
+
 		String htmlPreamble = "<html>" + "\n"
 				   + "<head>" + "\n"
 				   + "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />" + "\n"
@@ -488,7 +503,7 @@ public class SGBBookExtractor {
 				   + "}"+ "\n"
 				   + ");" + "\n"
 				   + "</script>"+ "\n"
-				   + "<table border=\"1\" id=\"myTable\" class=\"tablesorter\" style=\"\">"+ "\n"
+				   + "<table id=\"lm_table-chapters\" class=\"tablesorter lm_table lm_table-chapters\" style=\"\">"+ "\n"
 				   + "<thead>"+ "\n"
 				   + "<tr valign=bottom>"+ "\n"
 	               // + "<th align=\"left\" width=\"1%\">Sequence</th>"+ "\n" 
@@ -576,7 +591,7 @@ public class SGBBookExtractor {
 			
 			String nextTableRow = "<tr valign=top id=\"" + idifyString("chapter", chapter.identifier()) + "\" data-chapterid=\"" + chapter.identifier() + "\">" + "\n"
 					// + "<td>" + count + "</td>" + "\n" 
-					+ "<td>" + chapter.identifier() + "</td>" + "\n"
+					+ "<td data-sort=\"" + chapter.identifier() + "\">" + chapter.identifier() + "<span class=\"chapter-lookup mizicon\"></span></td>" + "\n"
 					+ "<td>" + sortedCharacters.size() + "</td>" + "\n"
 					+ "<td>" + chapter.allMeetups().size() + "</td>" + "\n"
 					+ "<td>" + characterGroupsDisplayStringBuffer.toString() + "</td>" + "\n";
@@ -663,6 +678,4 @@ public class SGBBookExtractor {
 		inString = inString.replaceAll("\\.", "_");
 		return type.trim() + "_" + inString.trim();
 	}
-
-
 }
